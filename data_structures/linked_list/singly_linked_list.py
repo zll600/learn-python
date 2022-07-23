@@ -1,5 +1,5 @@
 # https://docs.python.org/3/library/typing.html?highlight=any#typing.Any
-# Special type indicating an unconstrained ty
+# Special type indicating an unconstrained type
 from typing import Any
 
 class Node:
@@ -113,7 +113,7 @@ class LinkedList:
         return None
 
     def __setitem__(self, index: int, data: Any) -> None:
-         """
+        """
         >>> linked_list = LinkedList()
         >>> for i in range(0, 10):
         ...     linked_list.insert_nth(i, i)
@@ -136,7 +136,7 @@ class LinkedList:
             raise IndexError("List Index Out Of Range")
 
         cur = self.head
-        for i in range(index):
+        for _ in range(index):
             cur = cur.next
         cur.data = data
 
@@ -188,7 +188,7 @@ class LinkedList:
         >>> linked_list
         first->fourth->second->fifth->third
         """
-        if not 0 <= index < len(self):
+        if not 0 <= index <= len(self):
             raise IndexError("List Index Out Of Range")
 
         new_node = Node(data)
@@ -200,7 +200,7 @@ class LinkedList:
             self.head = new_node
         else:
             tmp = self.head
-            for _ in range(index):
+            for _ in range(index - 1):
                 tmp = tmp.next
 
             new_node.next = tmp.next
@@ -241,9 +241,9 @@ class LinkedList:
         >>> linked_list.delete_head()
         Traceback (most recent call last):
         ...
-        IndexError: List index out of range.
+        IndexError: List Index Out Of Range.
         """
-        return self.delete_nth(len(self) - 1)
+        return self.delete_nth(0)
 
     def delete_tail(self) -> Any:
         """
@@ -268,9 +268,9 @@ class LinkedList:
         >>> linked_list.delete_tail()
         Traceback (most recent call last):
         ...
-        IndexError: List index out of range.
+        IndexError: List Index Out Of Range.
         """
-        return self.delete_tail(0)
+        return self.delete_nth(len(self) - 1)
 
     def delete_nth(self, index: int) -> Any:
         """
@@ -289,24 +289,24 @@ class LinkedList:
         >>> linked_list.delete_nth(5) # this raises error
         Traceback (most recent call last):
         ...
-        IndexError: List index out of range.
+        IndexError: List Index Out Of Range.
         >>> linked_list.delete_nth(-1) # this also raises error
         Traceback (most recent call last):
         ...
-        IndexError: List index out of range.
+        IndexError: List Index Out Of Range.
         """
         if not 0 <= index < len(self):
-            raise IndexError("List Index Out Of Range")
+            raise IndexError("List Index Out Of Range.")
 
         delete_node = self.head
         if index == 0:
             self.head = delete_node.next
         else:
             tmp = self.head
-            for _ in range(index):
+            for _ in range(index - 1):
                 tmp = tmp.next
             delete_node = tmp.next
-            tmp.next = None
+            tmp.next = delete_node.next
         return delete_node.data
     
     def is_empty(self) -> bool:
@@ -351,11 +351,44 @@ def test_singly_linked_list() -> None:
     >>> test_singly_linked_list()
     """
     linked_list = LinkedList()
-    assert linked_list.is_empty() is True
+    assert linked_list.is_empty() == True
     assert str(linked_list) == ""
+
+    try:
+        linked_list.delete_head()
+        assert False
+    except IndexError:
+        assert True
+
+    try:
+        linked_list.delete_tail()
+        assert False
+    except IndexError:
+        assert True
+
+    for i in range(10):
+        linked_list.insert_nth(i, i + 1)
+        assert len(linked_list) == i + 1
+    assert str(linked_list) == "->".join(str(i) for i in range(1, 11))
+
+    linked_list.insert_head(0)
+    linked_list.insert_tail(11)
+    assert str(linked_list) == "->".join(str(i) for i in range(0, 12))
+
+    assert linked_list.delete_head() == 0
+    assert linked_list.delete_nth(9) == 10
+    assert linked_list.delete_tail() == 11
+    assert str(linked_list) == "->".join(str(i) for i in range(1, 10))
+
+    assert all(linked_list[i] == i + 1 for i in range(1, 11))
+
+
+
+def main():
+    from doctest import testmod
+
+    testmod()
 
 
 if __name__=="__main__":
-    import doctest
-
-    doctest.testmod()
+    main()
